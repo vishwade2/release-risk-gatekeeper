@@ -1,0 +1,10 @@
+{
+  "test_coverage": 78,
+  "critical_defects": 1,
+  "defect_leakage_trend": "increasing",
+  "flaky_tests_percentage": 12,
+  "deployment_frequency": "high",
+  "rollback_readiness": false,
+  "business_criticality": "high",
+  "recent_incidents": 3
+}

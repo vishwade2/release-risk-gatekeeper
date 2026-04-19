@@ -1,0 +1,9 @@
+{
+  "test_coverage": 72,
+  "passed_tests": 300,
+  "failed_tests": 18,
+  "critical_defects": 1,
+  "high_defects": 5,
+  "requirements_changed": true,
+  "regression_executed": false
+}

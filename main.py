@@ -7,7 +7,13 @@ from anthropic import Anthropic
 # Initialize client
 load_dotenv()
 
-client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+# Get API key from environment (works both local + Streamlit Cloud secrets)
+api_key = os.getenv("ANTHROPIC_API_KEY")
+
+if not api_key:
+    raise ValueError("❌ ANTHROPIC_API_KEY is missing in environment variables")
+
+client = Anthropic(api_key=api_key)
 
 # Load input data
 def load_data(file_path):

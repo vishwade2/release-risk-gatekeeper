@@ -1,44 +1,79 @@
-# 🧠 Release Risk Gatekeeper (AI Quality Gate System)
 
-An AI-powered release decision engine that evaluates software releases using structured quality, risk, and operational signals.
+# 🚦 AI Release Risk Gatekeeper
 
-It simulates a **Go / No-Go / Conditional release gate** similar to real-world QA + SRE release approval systems.
-
----
-
-## 🚀 What it does
-
-Given release metadata, the system:
-
-- Evaluates release readiness
-- Detects critical risks
-- Identifies missing validations
-- Generates actionable recommendations
-- Produces explainable confidence scoring
+An explainable AI system that evaluates software release readiness using structured inputs, deterministic scoring, and Claude-based 
+reasoning.
 
 ---
 
-## 🧠 Architecture Overview
+## 🧠 Problem Statement
+
+Release decisions in software engineering are often:
+- subjective
+- inconsistent across teams
+- not explainable after the fact
+
+This project builds an **AI-powered decision intelligence layer** that standardizes release evaluation with explainability.
 
 ---
 
-## 📥 Example Input
+## ⚙️ System Overview
 
-```json
-{
-  "test_coverage": 78,
-  "critical_defects": 1,
-  "flaky_tests_percentage": 12,
-  "rollback_readiness": false,
-  "defect_leakage_trend": "increasing",
-  "recent_incidents": 3
-}{
-  "release_decision": "NO_GO",
-  "confidence_score": 0.82,
-  "top_3_decision_factors": [],
-  "confidence_reason": "",
-  "key_risks": [],
-  "missing_validations": [],
-  "recommendations": []
-}
+The system combines:
+
+- 🧮 Deterministic scoring (Python logic)
+- 🧠 LLM reasoning (Anthropic Claude)
+- 📊 Structured validation + JSON output
+- 🖥️ Interactive UI (Streamlit)
+
+---
+
+## 🏗️ Architecture
+
+Streamlit UI
+↓
+run_pipeline()
+↓
+run_gatekeeper()
+↓
+Claude reasoning engine
+↓
+JSON structured decision output
+
+
+---
+
+## 📥 Input Signals
+
+- Test Coverage (%)
+- P1 Defects
+- Flaky Tests
+- Rollback Readiness
+- Recent Production Incidents
+
+---
+
+## 📤 Output
+
+- Release Decision → GO / NO-GO / CONDITIONAL
+- Confidence Score
+- Key Risks
+- Recommendations
+- Full Explainability (JSON view)
+
+---
+
+## 🚀 How to Run
+
+```bash
+pip install -r requirements.txt
+streamlit run app.py
+
+
+🧪 Tech Stack
+Python
+Streamlit
+Anthropic Claude API
+JSON structured reasoning layer
+
 

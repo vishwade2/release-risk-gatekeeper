@@ -102,15 +102,39 @@ Additional Requirements:
         if valid:
             print("\n✅ Final Decision:\n")
             print(json.dumps(parsed, indent=2))
-            return
+            return parsed
 
         error_context = output_text[:500]
         print(f"⚠️ Attempt {attempt+1} failed: {parsed}")
 
-    print("\n❌ All attempts failed. Could not get valid JSON.")
-
+    return {
+    "release_decision": "ERROR",
+    "confidence_score": 0.0,
+    "key_risks": ["Model failed to produce valid JSON"],
+    "missing_validations": [],
+    "recommendations": ["Check prompt / model stability"]
+}
 # Entry point
 if __name__ == "__main__":
     data = load_data("data/complex.json")
     run_gatekeeper(data)
 
+def run_pipeline(input_data: dict) -> dict:
+    """
+    Streamlit-safe wrapper around gatekeeper
+    """
+
+    result = run_gatekeeper(input_data)
+
+    return result
+
+if __name__ == "__main__":
+    sample = {
+        "coverage": 80,
+        "p1_defects": 1,
+        "flaky_tests": 5,
+        "rollback_ready": True,
+        "recent_incidents": 0
+    }
+
+    print(run_pipeline(sample))

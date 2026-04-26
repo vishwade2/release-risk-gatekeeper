@@ -17,6 +17,16 @@ rollback_ready = st.checkbox("Rollback Ready", value=True)
 
 recent_incidents = st.number_input("Recent Incidents", 0, 20, 1)
 
+performance_tested = st.selectbox(
+    "Performance Testing Status",
+    ["Not Provided", "Passed", "Failed"]
+)
+
+security_scan = st.selectbox(
+    "Security Scan Status",
+    ["Not Provided", "Passed", "Failed"]
+)
+
 if st.button("Evaluate Release"):
 
     input_data = {
@@ -24,13 +34,19 @@ if st.button("Evaluate Release"):
       "p1_defects": p1_defects,
       "flaky_tests": flaky_tests,
       "rollback_ready": rollback_ready,
-      "recent_incidents": recent_incidents
+      "recent_incidents": recent_incidents,
+      "performance_tested": performance_tested,
+      "security_scan": security_scan
     }
     result = run_pipeline(input_data)
 
     st.subheader("📊 Decision")
 
     st.markdown(f"### {result.get('release_decision', 'UNKNOWN')}")
+
+    st.subheader("🔍 Decision Breakdown (Deterministic Signals)")
+    for item in result.get("decision_breakdown", []):
+        st.write(f"• {item}")
 
     st.subheader("⚠️ Key Risks")
     for r in result.get("key_risks", []):

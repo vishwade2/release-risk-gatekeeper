@@ -72,11 +72,19 @@ OUTPUT FORMAT (STRICT JSON ONLY):
   "recommendations": []
 }}
 
+Additional Signals:
+- performance_tested: Indicates if performance validation was done
+- security_scan: Indicates if security validation was done
+
 Rules:
 - Output ONLY valid JSON
 - No markdown
 - No explanation
 - No extra text
+
+Additional Rules:
+- If performance_tested or security_scan is "Not Provided", include in missing_validations
+- If either is "Failed", treat as high risk
 
 Additional Requirements:
 - Identify top 3 strongest factors influencing the decision
@@ -125,14 +133,49 @@ if __name__ == "__main__":
     data = load_data("data/complex.json")
     run_gatekeeper(data)
 
-def run_pipeline(input_data: dict) -> dict:
-    """
-    Streamlit-safe wrapper around gatekeeper
-    """
+def compute_breakdown(data):
+    breakdown = []
 
+    if data["coverage"] < 70:
+        breakdown.append("Low test coverage increases risk")
+
+    if data["p1_defects"] > 0:
+        breakdown.append("Presence of P1 defects is a major risk factor")
+
+    if data["flaky_tests"] > 5:
+        breakdown.append("High flaky tests reduce confidence in test reliability")
+
+    if not data["rollback_ready"]:
+        breakdown.append("No rollback plan increases release risk")
+
+    if data["recent_incidents"] > 2:
+        breakdown.append("Recent production incidents indicate instability")
+
+    if data.get("performance_tested") == "Not Provided":
+        breakdown.append("Performance validation missing")
+
+    if data.get("security_scan") == "Not Provided":
+        breakdown.append("Security validation missing")
+
+    if data.get("performance_tested") == "Failed":
+        breakdown.append("Performance tests failed - high risk")
+
+    if data.get("security_scan") == "Failed":
+        breakdown.append("Security scan failed - high risk")
+
+    return breakdown
+
+def run_pipeline(input_data):
     result = run_gatekeeper(input_data)
 
+    # Add deterministic breakdown
+    breakdown = compute_breakdown(input_data)
+
+    if isinstance(result, dict):
+        result["decision_breakdown"] = breakdown
+
     return result
+
 
 if __name__ == "__main__":
     sample = {

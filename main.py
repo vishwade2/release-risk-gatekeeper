@@ -76,11 +76,19 @@ Additional Signals:
 - performance_tested: Indicates if performance validation was done
 - security_scan: Indicates if security validation was done
 
+- regression_status: Status of regression testing
+- release_type: Nature of release (Hotfix / Standard / Major)
+
 Rules:
 - Output ONLY valid JSON
 - No markdown
 - No explanation
 - No extra text
+
+- If regression_status is "Failed", treat as high risk
+- If "Partial" or "Not Provided", reduce confidence
+- Major releases should be evaluated with stricter risk consideration
+- Hotfix releases may proceed with limited validation but should highlight risk
 
 Additional Rules:
 - If performance_tested or security_scan is "Not Provided", include in missing_validations
@@ -162,6 +170,22 @@ def compute_breakdown(data):
 
     if data.get("security_scan") == "Failed":
         breakdown.append("Security scan failed - high risk")
+    
+    if data.get("regression_status") == "Failed":
+        breakdown.append("Regression tests failed - high risk")
+
+    elif data.get("regression_status") == "Partial":
+        breakdown.append("Partial regression coverage reduces confidence")
+
+    elif data.get("regression_status") == "Not Provided":
+        breakdown.append("Regression results not provided")
+
+# Release context
+    if data.get("release_type") == "Major":
+        breakdown.append("Major release increases risk exposure")
+
+    elif data.get("release_type") == "Hotfix":
+        breakdown.append("Hotfix release may have limited validation scope")
 
     return breakdown
 

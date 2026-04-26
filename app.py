@@ -27,6 +27,17 @@ security_scan = st.selectbox(
     ["Not Provided", "Passed", "Failed"]
 )
 
+regression_status = st.selectbox(
+    "Regression Test Status",
+    ["Not Provided", "Passed", "Partial", "Failed"]
+)
+
+release_type = st.selectbox(
+    "Release Type",
+    ["Standard", "Hotfix", "Major"]
+)
+
+
 if st.button("Evaluate Release"):
 
     input_data = {
@@ -36,7 +47,9 @@ if st.button("Evaluate Release"):
       "rollback_ready": rollback_ready,
       "recent_incidents": recent_incidents,
       "performance_tested": performance_tested,
-      "security_scan": security_scan
+      "security_scan": security_scan,
+      "regression_status": regression_status,
+      "release_type": release_type
     }
     result = run_pipeline(input_data)
 

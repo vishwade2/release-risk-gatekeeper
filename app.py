@@ -58,7 +58,7 @@ if st.button("Evaluate Release"):
     st.markdown(f"### {result.get('release_decision', 'UNKNOWN')}")
 
     st.subheader("🔍 Decision Breakdown (Deterministic Signals)")
-    for item in result.get("decision_breakdown", []):
+    for item in (result.get("decision_breakdown") or []):
         st.write(f"• {item}")
 
     st.subheader("⚠️ Key Risks")

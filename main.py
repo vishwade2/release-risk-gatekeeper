@@ -180,6 +180,51 @@ def compute_breakdown(data):
     elif data.get("regression_status") == "Not Provided":
         breakdown.append("Regression results not provided")
 
+
+def compute_confidence(data):
+    score = 1.0
+
+    # Coverage impact
+    if data["coverage"] < 70:
+        score -= 0.15
+    elif data["coverage"] < 85:
+        score -= 0.05
+
+    # Defects impact
+    if data["p1_defects"] > 0:
+        score -= 0.25
+
+    # Flaky tests
+    if data["flaky_tests"] > 5:
+        score -= 0.1
+
+    # Rollback safety
+    if not data["rollback_ready"]:
+        score -= 0.2
+
+    # Incidents
+    if data["recent_incidents"] > 2:
+        score -= 0.15
+
+    # Validation signals
+    if data.get("performance_tested") == "Failed":
+        score -= 0.2
+
+    if data.get("security_scan") == "Failed":
+        score -= 0.2
+
+    if data.get("regression_status") == "Failed":
+        score -= 0.25
+
+    if data.get("release_type") == "Major":
+        score -= 0.1
+
+    if data.get("release_type") == "Hotfix":
+        score += 0.05  # slightly more tolerant
+
+    return max(0.0, round(score, 2))
+
+
 # Release context
     if data.get("release_type") == "Major":
         breakdown.append("Major release increases risk exposure")
@@ -189,14 +234,16 @@ def compute_breakdown(data):
 
     return breakdown
 
-def run_pipeline(input_data):
+
+def run_pipeline(input_data: dict) -> dict:
     result = run_gatekeeper(input_data)
 
-    # Add deterministic breakdown
     breakdown = compute_breakdown(input_data)
+    confidence = compute_confidence(input_data)
 
     if isinstance(result, dict):
         result["decision_breakdown"] = breakdown
+        result["confidence_score"] = confidence  # override LLM score
 
     return result
 

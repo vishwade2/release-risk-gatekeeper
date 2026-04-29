@@ -107,7 +107,8 @@ Additional Requirements:
 
         response = client.messages.create(
             model="claude-sonnet-4-6",
-            max_tokens=800,
+            max_tokens=1200,
+            temperature=0,
             messages=[
                 {
                     "role": "user",
@@ -224,6 +225,39 @@ def compute_confidence(data):
 
     return max(0.0, round(score, 2))
 
+def fallback_decision(input_data, breakdown, confidence):
+    if confidence <= 0.4:
+        decision = "NO_GO"
+    elif confidence <= 0.7:
+        decision = "CONDITIONAL"
+    else:
+        decision = "GO"
+
+    missing = []
+
+    if input_data.get("performance_tested") == "Not Provided":
+        missing.append("Performance testing results not provided")
+
+    if input_data.get("security_scan") == "Not Provided":
+        missing.append("Security scan assessment not provided")
+
+    if input_data.get("regression_status") == "Not Provided":
+        missing.append("Regression test results not provided")
+
+    return {
+        "release_decision": decision,
+        "confidence_score": confidence,
+        "top_3_decision_factors": breakdown[:3],
+        "confidence_reason": "Confidence is based on deterministic risk scoring because AI reasoning output was unavailable or invalid.",
+        "key_risks": breakdown[:5],
+        "missing_validations": missing,
+        "recommendations": [
+            "Review highlighted risk signals before release approval",
+            "Complete missing validations where applicable",
+            "Use this output as decision support, not automatic approval"
+        ]
+    }
+
 
 # Release context
     if data.get("release_type") == "Major":
@@ -238,12 +272,14 @@ def compute_confidence(data):
 def run_pipeline(input_data: dict) -> dict:
     result = run_gatekeeper(input_data)
 
-    breakdown = compute_breakdown(input_data)
+    breakdown = compute_breakdown(input_data) or []
     confidence = compute_confidence(input_data)
 
-    if isinstance(result, dict):
-        result["decision_breakdown"] = breakdown
-        result["confidence_score"] = confidence  # override LLM score
+    if not isinstance(result, dict) or result.get("release_decision") == "ERROR":
+        result = fallback_decision(input_data, breakdown, confidence)
+
+    result["decision_breakdown"] = breakdown
+    result["confidence_score"] = confidence
 
     return result
 
